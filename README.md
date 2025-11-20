@@ -24,6 +24,6 @@ enabled = true
 
 to `\Kitten Space Agency\Content\mainfest.toml` or `\Documents\My Games\Kitten Space Agency\manifest.toml`.
 
-And make sure you put the `TempDebug` folder in `\Kitten Space Agency\Content\`.
+And make sure you put the `Celestial Charter` folder in `\Kitten Space Agency\Content\`.
 
 If you are a modder and you want to use any of the code, go ahead.
