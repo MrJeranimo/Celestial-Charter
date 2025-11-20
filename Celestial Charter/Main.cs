@@ -2,21 +2,26 @@
 using StarMap.API;
 using Brutal.Logging;
 using Brutal.ImGuiApi;
+using System.Collections;
 
 namespace Celestial_Charter
 {
     [StarMapMod]
     public class Main
     {
-        private CelestialSystem? _celestialSystem = null;
-        private int _numCelestials = 0;
-        private List<Astronomical>? _astronomicals = null;
-        private Vehicle? _currentVehicle = null;
-        private Orbit? _vehicleOrbit = null;
-        private Astronomical? _astronomicalOrbiting = null;
-        private Situation? _vehicleSituation = null;
-        private readonly string _GUINAME = "Celestial Charter";
-        private bool _showWindow = true;
+        private CelestialSystem? CelestialSystem = null;
+        private int NumCelestials = 0;
+        public List<Astronomical> Astronomicals { get; private set; } = new List<Astronomical>();
+        private Vehicle? CurrentVehicle = null;
+        private VehicleData? CurrentVehicleData = null;
+        private Orbit? VehicleOrbit = null;
+        private Astronomical? AstronomicalOrbiting = null;
+        private Situation VehicleSituation = new Situation();
+        public List<Astronomical> NonVehicleAstronomicalList { get; private set; } = new List<Astronomical>();
+        public List<Vehicle> VehicleList { get; private set; } = new List<Vehicle>();
+        private List<VehicleData> VehicleDataList { get; set; } = new List<VehicleData>();
+        private readonly string GUINAME = "Celestial Charter";
+        private bool ShowWindow = true;
 
         [StarMapAllModsLoaded]
         public void AfterSystemLoaded()
@@ -27,11 +32,20 @@ namespace Celestial_Charter
         [StarMapBeforeGui]
         public void BeforeGUI(double dt)
         {
-            if(_celestialSystem == null)
+            if (CelestialSystem == null)
             {
-                _celestialSystem = CelestialData.FetchCelestialSystem();
-                _numCelestials = CelestialData.numCelestials;
-                _astronomicals = CelestialData.astronomicalList;
+                CelestialSystem = CelestialData.FetchCelestialSystem();
+                NumCelestials = CelestialData.NumCelestials;
+                Astronomicals = CelestialData.AstronomicalList;
+                NonVehicleAstronomicalList = CelestialData.AstronomicalNonVehicleList;
+                if(CelestialSystem != null)
+                {
+                    VehicleList = CelestialSystem.Vehicles.GetList();
+                    foreach (var vehicle in VehicleList)
+                    {
+                        VehicleDataList.Add(new VehicleData(vehicle, NonVehicleAstronomicalList.Count, NonVehicleAstronomicalList));
+                    }
+                }
             }
         }
 
@@ -39,53 +53,78 @@ namespace Celestial_Charter
         [StarMapAfterGui]
         public void AfterGUI(double dt)
         {
-            _currentVehicle = VehicleData.fetchCurrentVehicle();
-            _vehicleOrbit = VehicleData.vehicleOrbit;
-            _astronomicalOrbiting = VehicleData.astronomicalOrbiting;
-            _vehicleSituation = VehicleData.vehicleSituation;
-            bool isLanded = false;
-
-            if (!_showWindow) return;
-
-            ImGuiWindowFlags flags = ImGuiWindowFlags.None;
-            if(ImGui.Begin(_GUINAME, ref _showWindow, flags))
+            CurrentVehicle = Program.ControlledVehicle;
+            if (CurrentVehicle != null)
             {
-                ImGui.Text($"Number of Celestials: {_numCelestials}");
-                if (_celestialSystem != null) ImGui.Text($"Current Celestial System: {_celestialSystem.Id}");
-                ImGui.Separator();
-                if(_currentVehicle != null) ImGui.Text($"Current Vehicle: {_currentVehicle.Id}");
-                if(_vehicleOrbit != null) ImGui.Text($"Vehicle Orbit: {_vehicleOrbit}");
-                if(_astronomicalOrbiting != null) ImGui.Text($"Astronomical Orbiting: {_astronomicalOrbiting.Id}");
-                if (_vehicleSituation == KSA.Situation.Landed) isLanded = true;
-                ImGui.Text($"Is Landed: {isLanded}");
-                ImGui.Separator();
-                if (_astronomicals != null )
+                VehicleOrbit = CurrentVehicle.Orbit;
+                AstronomicalOrbiting = VehicleOrbit.Parent;
+                VehicleSituation = CurrentVehicle.LastKinematicStates.Situation;
+                CurrentVehicleData = VehicleDataList.Find(x => x.Vehicle == CurrentVehicle);
+                if (CurrentVehicleData != null)
                 {
-                    foreach(var astro in _astronomicals)
+                    CurrentVehicleData.Update();
+
+                    if (!ShowWindow) return;
+
+                    ImGuiWindowFlags flags = ImGuiWindowFlags.None;
+                    if (ImGui.Begin(GUINAME, ref ShowWindow, flags))
                     {
-                        ImGui.Text($"Astronomical Name: {astro.Id}");
+                        if (CelestialSystem != null) ImGui.Text($"Current Celestial System: {CelestialSystem.Id}");
+                        ImGui.Separator();
+                        if (CurrentVehicle != null) ImGui.Text($"Current Vehicle: {CurrentVehicle.Id}");
+                        ImGui.Separator();
+                        if (AstronomicalOrbiting != null) ImGui.Text($"Astronomical Orbiting: {AstronomicalOrbiting.Id}");
+                        ImGui.Separator();
+                        if (ImGui.CollapsingHeader("Astronomical Status"))
+                        {
+                            ImGuiTableFlags tableFlags = ImGuiTableFlags.SizingStretchSame | ImGuiTableFlags.Resizable | ImGuiTableFlags.BordersOuter | ImGuiTableFlags.BordersV | ImGuiTableFlags.ContextMenuInBody;
+                            for (int i = 0; i < CurrentVehicleData.StatusArray.Count; i++)
+                            {
+                                if (ImGui.TreeNode(CurrentVehicleData.AstronomicalDataList[i].Id))
+                                {
+                                    ImGui.Separator();
+                                    BitArray? status = CurrentVehicleData.StatusArray[i] as BitArray;
+                                    if (status != null)
+                                    {
+                                        ImGui.Text($"Visited: {status[0]}");
+                                        if (ImGui.BeginTable("Status", 2, tableFlags))
+                                        {
+                                            // Try new Table patterns
+                                            ImGui.TableNextRow();
+                                            ImGui.TableSetColumnIndex(0);
+                                            ImGui.Text($"Flying By: {status[1]}");
+                                            ImGui.TableSetColumnIndex(1);
+                                            ImGui.Text($"Have Flown By: {status[2]}");
+                                            ImGui.TableNextRow();
+                                            ImGui.TableSetColumnIndex(0);
+                                            ImGui.Text($"Orbiting: {status[3]}");
+                                            ImGui.TableSetColumnIndex(1);
+                                            ImGui.Text($"Have Orbited: {status[4]}");
+                                            ImGui.TableNextRow();
+                                            ImGui.TableSetColumnIndex(0);
+                                            ImGui.Text($"Landed: {status[5]}");
+                                            ImGui.TableSetColumnIndex(1);
+                                            ImGui.Text($"Have Landed: {status[6]}");
+                                            ImGui.TableNextRow();
+                                            ImGui.TableSetColumnIndex(0);
+                                            ImGui.Text($"Splashed Down: {status[7]}");
+                                            ImGui.TableSetColumnIndex(1);
+                                            ImGui.Text($"Have Splashed Down: {status[8]}");
+                                            ImGui.EndTable();
+                                        }
+                                    }
+                                    ImGui.TreePop();
+                                }
+                                ImGui.Separator();
+                            }
+                        }
                     }
-                }
-                
-                if(ImGui.BeginMenu("Celestial Menu")) 
-                {
-                    ImGui.MenuItem($"{CelestialData.numCelestials}");
-                    ImGui.EndMenu();
-                }
-                if (ImGui.CollapsingHeader("Test"))
-                {
-                    ImGui.Text("This is a test");
-                }
-                if(ImGui.TreeNode("Bullets"))
-                {
-                    ImGui.BulletText("Bullet Text 1");
-                    ImGui.BulletText($"Is Item Hovered: {ImGui.IsAnyItemHovered()}");
-                    ImGui.TreePop();
+                    ImGui.End();
                 }
             }
-            ImGui.End();
         }
 
+        // IDK
         private static void CreatePopup(string name, string[] text)
         {
             // This function is just to show how a ImGui Popup is created

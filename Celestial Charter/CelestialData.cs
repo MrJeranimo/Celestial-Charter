@@ -5,31 +5,30 @@ namespace Celestial_Charter
 {
     internal class CelestialData
     {
-        public static CelestialSystem? celestialSystem { get; private set; } = null;
-        public static int numCelestials { get; private set; } = 0;
-        public static List<Astronomical>? astronomicalList { get; private set; } = null;
+        public static CelestialSystem? CelestialSystem { get; private set; } = null;
+        public static int NumCelestials { get; private set; } = 0;
+        public static List<Astronomical> AstronomicalList { get; private set; } = new List<Astronomical>();
+        public static List<Astronomical> AstronomicalNonVehicleList { get; private set; } = new List<Astronomical>();
+        public static List<Vehicle> VehicleList { get; private set; } = new List<Vehicle>();
 
 
         public static CelestialSystem? FetchCelestialSystem()
         {
-            celestialSystem = KSA.Universe.CurrentSystem;
-            if (celestialSystem != null)
+            CelestialSystem = KSA.Universe.CurrentSystem;
+            if (CelestialSystem != null)
             {
-                numCelestials = celestialSystem.CelestialCount;
-                astronomicalList = celestialSystem.All.GetList();
-                GenerateEachAstronomicalData();
+                NumCelestials = CelestialSystem.CelestialCount;
+                AstronomicalList = CelestialSystem.All.GetList();
+                VehicleList = CelestialSystem.Vehicles.GetList();
+                foreach(var astro in AstronomicalList)
+                {
+                    if(astro.Class != "Vehicle")
+                    {
+                        AstronomicalNonVehicleList.Add(astro);
+                    }
+                }
             }
-            return celestialSystem;
-        }
-
-        private static void GenerateEachAstronomicalData()
-        {
-            if (astronomicalList == null) return;
-
-            foreach(var astro in astronomicalList)
-            {
-                
-            }
+            return CelestialSystem;
         }
     }
 }
