@@ -2,7 +2,9 @@
 using StarMap.API;
 using Brutal.Logging;
 using Brutal.ImGuiApi;
+using Brutal.GlfwApi;
 using System.Collections;
+using RenderCore;
 
 namespace Celestial_Charter
 {
@@ -21,12 +23,18 @@ namespace Celestial_Charter
         public List<Vehicle> VehicleList { get; private set; } = new List<Vehicle>();
         private List<VehicleData> VehicleDataList { get; set; } = new List<VehicleData>();
         private readonly string GUINAME = "Celestial Charter";
-        private bool ShowWindow = true;
+        public static bool ShowWindow = true;
 
         [StarMapAllModsLoaded]
-        public void AfterSystemLoaded()
+        public void OnFullyLoaded()
         {
-            DefaultCategory.Log.Info("Celestial Charter has been Loaded", "Celestial Charter");
+            Patcher.Patch();
+        }
+
+        [StarMapUnload]
+        public void OnUnload()
+        {
+            Patcher.Unload();
         }
 
         [StarMapBeforeGui]

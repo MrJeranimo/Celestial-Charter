@@ -41,6 +41,10 @@
       <HintPath>..\..\..\..\..\..\Program Files\Kitten Space Agency\KSA.dll</HintPath>
 	    <Private>false</Private>
     </Reference>
+    <Reference Include="Planet.Render.Core">
+      <HintPath>..\..\..\..\..\..\Program Files\Kitten Space Agency\Planet.Render.Core.dll</HintPath>
+		<Private>false</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

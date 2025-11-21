@@ -7,6 +7,18 @@ namespace Celestial_Charter
 {
     internal class VehicleData
     {
+        public enum BitStatus
+        {
+            Visited,
+            FlyingBy,
+            FlownBy,
+            Orbiting,
+            Orbited,
+            IsLanded,
+            HasLanded,
+            IsSplashedDown,
+            HasSplashedDown,
+        }
         public Vehicle Vehicle { get; private set; }
         public Orbit VehicleOrbit {  get; private set; }
         public Astronomical AstronomicalOrbiting { get; private set; }
@@ -74,35 +86,54 @@ namespace Celestial_Charter
         private void UpdateStatus(BitArray astroStatus)
         {
             // Visited = true
-            astroStatus.Set(0, true);
+            astroStatus.Set((int)BitStatus.Visited, true);
 
-            // Fix edge-case where astroStatus cannot reset TempSituation variables if another type of Situation is true
             if(isFlyingBy())
             {
-                astroStatus.Set(1, true);
-                astroStatus.Set(2, true);
+                astroStatus.Set((int)BitStatus.FlyingBy, true);
+                astroStatus.Set((int)BitStatus.FlownBy, true);
+
+                // Make sure the other Temporary situations are false.
+                astroStatus.Set((int)BitStatus.Orbiting, false);
+                astroStatus.Set((int)BitStatus.IsLanded, false);
+                astroStatus.Set((int)BitStatus.IsSplashedDown, false);
             }
             else if(isOrbiting())
             {
-                astroStatus.Set(3, true);
-                astroStatus.Set(4, true);
+                astroStatus.Set((int)BitStatus.Orbiting, true);
+                astroStatus.Set((int)BitStatus.Orbited, true);
+
+                // Make sure the other Temporary situations are false.
+                astroStatus.Set((int)BitStatus.FlyingBy, false);
+                astroStatus.Set((int)BitStatus.IsLanded, false);
+                astroStatus.Set((int)BitStatus.IsSplashedDown, false);
             }
             else if(VehicleSituation.HasTerrainContact())
             {
-                astroStatus.Set(5, true);
-                astroStatus.Set(6, true);
+                astroStatus.Set((int)BitStatus.IsLanded, true);
+                astroStatus.Set((int)BitStatus.HasLanded, true);
+
+                // Make sure the other Temporary situations are false.
+                astroStatus.Set((int)BitStatus.FlyingBy, false);
+                astroStatus.Set((int)BitStatus.Orbiting, false);
+                astroStatus.Set((int)BitStatus.IsSplashedDown, false);
             }
             else if(VehicleSituation.HasOceanContact())
             {
-                astroStatus.Set(7, true);
-                astroStatus.Set(8, true);
+                astroStatus.Set((int)BitStatus.IsSplashedDown, true);
+                astroStatus.Set((int)BitStatus.HasSplashedDown, true);
+
+                // Make sure the other Temporary situations are false.
+                astroStatus.Set((int)BitStatus.FlyingBy, false);
+                astroStatus.Set((int)BitStatus.Orbiting, false);
+                astroStatus.Set((int)BitStatus.IsLanded, false);
             }
             else
             {
-                astroStatus.Set(1, false);
-                astroStatus.Set(3, false);
-                astroStatus.Set(5, false);
-                astroStatus.Set(7, false);
+                astroStatus.Set((int)BitStatus.FlyingBy, false);
+                astroStatus.Set((int)BitStatus.Orbiting, false);
+                astroStatus.Set((int)BitStatus.IsLanded, false);
+                astroStatus.Set((int)BitStatus.IsSplashedDown, false);
             }
         }
 
