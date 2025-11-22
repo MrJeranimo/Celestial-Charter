@@ -108,16 +108,22 @@ namespace Celestial_Charter
                                             ImGui.Text($"Orbiting: {status[3]}");
                                             ImGui.TableSetColumnIndex(1);
                                             ImGui.Text($"Have Orbited: {status[4]}");
-                                            ImGui.TableNextRow();
-                                            ImGui.TableSetColumnIndex(0);
-                                            ImGui.Text($"Landed: {status[5]}");
-                                            ImGui.TableSetColumnIndex(1);
-                                            ImGui.Text($"Have Landed: {status[6]}");
-                                            ImGui.TableNextRow();
-                                            ImGui.TableSetColumnIndex(0);
-                                            ImGui.Text($"Splashed Down: {status[7]}");
-                                            ImGui.TableSetColumnIndex(1);
-                                            ImGui.Text($"Have Splashed Down: {status[8]}");
+                                            if (CurrentVehicleData.AstronomicalDataList[i].HasSurface)
+                                            {
+                                                ImGui.TableNextRow();
+                                                ImGui.TableSetColumnIndex(0);
+                                                ImGui.Text($"Landed: {status[5]}");
+                                                ImGui.TableSetColumnIndex(1);
+                                                ImGui.Text($"Have Landed: {status[6]}");
+                                            }
+                                            if (CurrentVehicleData.AstronomicalDataList[i].HasOceans)
+                                            {
+                                                ImGui.TableNextRow();
+                                                ImGui.TableSetColumnIndex(0);
+                                                ImGui.Text($"Splashed Down: {status[7]}");
+                                                ImGui.TableSetColumnIndex(1);
+                                                ImGui.Text($"Have Splashed Down: {status[8]}");
+                                            }
                                             ImGui.EndTable();
                                         }
                                     }
