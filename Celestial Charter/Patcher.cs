@@ -29,14 +29,17 @@ namespace Celestial_Charter
             GlfwKey key = keyEvent.Key;
             GlfwKeyAction action = keyEvent.Action;
 
-            // This can be optimized with a switch case
-            if (key == GlfwKey.RightBracket && action == GlfwKeyAction.Release)
+            // When Switching vehicles reopen the Celestial Charter window
+            if ((key == GlfwKey.LeftBracket || key == GlfwKey.RightBracket) && action == GlfwKeyAction.Release)
             {
                 Main.ShowWindow = true;
+
+                // Return true to continue with the other key checks
                 return true;
             }
-
-            return false;
+            // Return true to continue with the other key checks
+            return true;
+            // Return false to skip all the other key checks
         }
     }
 }
