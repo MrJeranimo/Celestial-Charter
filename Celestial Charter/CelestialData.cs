@@ -20,6 +20,8 @@ namespace Celestial_Charter
                 NumCelestials = CelestialSystem.CelestialCount;
                 AstronomicalList = CelestialSystem.All.GetList();
                 VehicleList = CelestialSystem.Vehicles.GetList();
+                
+                // Sort out the vehicles from every astronomical
                 foreach(var astro in AstronomicalList)
                 {
                     if(astro.Class != "Vehicle")

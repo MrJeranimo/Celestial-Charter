@@ -50,23 +50,26 @@ namespace Celestial_Charter
         /// <summary>
         /// Contains a List of all the non-Vehicle Astronomicals as an AstronomicalData class.
         /// </summary>
-        public List<AstronomicalData> AstronomicalDataList { get; private set; } = new List<AstronomicalData>();
+        public static List<AstronomicalData> AstronomicalDataList { get; private set; } = new List<AstronomicalData>();
         public int curStatusIndex { get; private set; }
         public BitArray? AstroStatus { get; private set; }
 
-        public VehicleData(Vehicle vehicle, int numAstronomicalsNonVehicle, List<Astronomical> astronomicalsNonVehicle)
+        public VehicleData(Vehicle vehicle)
         {
             this.Vehicle = vehicle;
             VehicleOrbit = vehicle.Orbit;
             AstronomicalOrbiting = VehicleOrbit.Parent;
             VehicleSituation = vehicle.LastKinematicStates.Situation;
-            StatusArray = new ArrayList(numAstronomicalsNonVehicle);
-            foreach(var astro in astronomicalsNonVehicle)
+            StatusArray = new ArrayList(AstronomicalDataList.Count);
+            foreach(var astro in AstronomicalDataList)
             {
+                // Create a Status for each of the astronomicals for this vehicle
                 StatusArray.Add(new BitArray(13, false));
-                AstronomicalDataList.Add(new AstronomicalData(astro));
             }
+            // Get the current astronomical's index in the Data List
             curStatusIndex = AstronomicalDataList.FindIndex(x => x.Astronomical.Id == AstronomicalOrbiting.Id);
+
+            // Get the current astronomical's BitArray
             AstroStatus = StatusArray[curStatusIndex] as BitArray;
         }
 
@@ -78,8 +81,13 @@ namespace Celestial_Charter
             VehicleSituation = Vehicle.LastKinematicStates.Situation;
             if(oldOrbit != AstronomicalOrbiting)
             {
+                // Clear Temp Status for old astronomical
                 if (AstroStatus != null) setTempStatusFalse(AstroStatus);
+
+                // Find new astronomical's index in th Data List
                 curStatusIndex = AstronomicalDataList.FindIndex(x => x.Astronomical == AstronomicalOrbiting);
+
+                // Get the new astronomical's BitArray
                 AstroStatus = StatusArray[curStatusIndex] as BitArray;
             }
             if (AstroStatus != null)
@@ -135,7 +143,7 @@ namespace Celestial_Charter
 
         private bool isFlyingBy()
         {
-            // Try and improve
+            //          Absolute Apoapsis > Astronomical SOI
             return (VehicleOrbit.Apoapsis > AstronomicalOrbiting.SphereOfInfluence || (VehicleOrbit.Apoapsis < 0 && VehicleOrbit.Periapsis > 10000));
         }
 
@@ -143,11 +151,13 @@ namespace Celestial_Charter
         {
             if(AstronomicalDataList[curStatusIndex].HasAtmosphere)
             {
+                //                                                             Relative Periapsis > Atmosphere Height
                 return (!isFlyingBy() && VehicleOrbit.Periapsis - AstronomicalOrbiting.MeanRadius > AstronomicalDataList[curStatusIndex].AtmosphereHeightM);
             }
             else
             {
-                return (!isFlyingBy() && VehicleOrbit.Periapsis > AstronomicalOrbiting.MeanRadius + 2500);
+                //                           Absolute Periapsis > Astronomical Radius
+                return (!isFlyingBy() && VehicleOrbit.Periapsis > AstronomicalOrbiting.MeanRadius);
             }
         }
 
@@ -155,16 +165,19 @@ namespace Celestial_Charter
         {
             if(AstronomicalDataList[curStatusIndex].HasAtmosphere)
             {
+                //                                                          Relative Periapsis < Atmosphere Height                                      &&                                       Relative Apoapsis > Atmosphere Height
                 return (isFlying() && VehicleOrbit.Periapsis - AstronomicalOrbiting.MeanRadius < AstronomicalDataList[curStatusIndex].AtmosphereHeightM && VehicleOrbit.Apoapsis - AstronomicalOrbiting.MeanRadius > AstronomicalDataList[curStatusIndex].AtmosphereHeightM);
             }
             else
             {
+                //                        Absolute Periapsis < Astronomical Radius
                 return (isFlying() && VehicleOrbit.Periapsis < AstronomicalOrbiting.MeanRadius);
             }
         }
 
         private bool inAtmosphere()
         {
+            //                          if Astronomical Has Atmosphere &&              Sea Level Altitude <= Atmosphere Height
             return (AstronomicalDataList[curStatusIndex].HasAtmosphere && Vehicle.GetBarometricAltitude() <= AstronomicalDataList[curStatusIndex].AtmosphereHeightM);
         }
 
