@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace Celestial_Charter
 {
-    internal class AstronomicalData : IEquatable<AstronomicalData>
+    public class AstronomicalData : IEquatable<AstronomicalData>
     {
         public Astronomical Astronomical { get; private set; }
         public string Id { get; private set; }
@@ -15,8 +15,10 @@ namespace Celestial_Charter
         public bool IsPlanet { get; private set; }
         public bool IsVehicle { get; private set; }
         public bool HasOceans { get; private set; }
-        public OceanReference? OceanReference { get; private set; }
         public bool HasSurface { get; private set; }
+        public bool HasAtmosphere { get; private set; }
+        public AtmosphereReference? Atmosphere { get; private set; }
+        public double AtmosphereHeightM { get; private set; } = 0.0;
 
         public AstronomicalData(Astronomical astronomical)
         {
@@ -27,9 +29,14 @@ namespace Celestial_Charter
             Class = Astronomical.Class;
             if (Class == "Vehicle") { IsVehicle = true; } else { IsVehicle = false; }
             if (!IsVehicle && !IsMoon && !IsStar) { IsPlanet = true; } else { IsPlanet = false; }
-            OceanReference = Astronomical.BodyTemplate.OceanReference;
-            if (OceanReference != null) HasOceans = true;
+            if (Astronomical.BodyTemplate.OceanReference != null) HasOceans = true;
             if (Astronomical.BodyTemplate.TerrainReference != null) HasSurface = true;
+            if (Astronomical.BodyTemplate.AtmosphereReference != null)
+            {
+                Atmosphere = Astronomical.BodyTemplate.AtmosphereReference;
+                HasAtmosphere = true;
+                AtmosphereHeightM = Atmosphere.Physical.Height.M;
+            }
         }
 
         public bool Equals(AstronomicalData? other)

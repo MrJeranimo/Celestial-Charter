@@ -2,27 +2,25 @@
 using StarMap.API;
 using Brutal.Logging;
 using Brutal.ImGuiApi;
-using Brutal.GlfwApi;
 using System.Collections;
-using RenderCore;
 
 namespace Celestial_Charter
 {
     [StarMapMod]
     public class Main
     {
-        private CelestialSystem? CelestialSystem = null;
-        private int NumCelestials = 0;
+        public CelestialSystem? CelestialSystem = null;
+        public int NumCelestials = 0;
         public List<Astronomical> Astronomicals { get; private set; } = new List<Astronomical>();
-        private Vehicle? CurrentVehicle = null;
-        private VehicleData? CurrentVehicleData = null;
-        private Orbit? VehicleOrbit = null;
-        private Astronomical? AstronomicalOrbiting = null;
-        private Situation VehicleSituation = new Situation();
+        public Vehicle? CurrentVehicle = null;
+        public VehicleData? CurrentVehicleData = null;
+        public Orbit? VehicleOrbit = null;
+        public Astronomical? AstronomicalOrbiting = null;
+        public Situation VehicleSituation = new Situation();
         public List<Astronomical> NonVehicleAstronomicalList { get; private set; } = new List<Astronomical>();
         public List<Vehicle> VehicleList { get; private set; } = new List<Vehicle>();
         private List<VehicleData> VehicleDataList { get; set; } = new List<VehicleData>();
-        private readonly string GUINAME = "Celestial Charter";
+        public readonly string GUINAME = "Celestial Charter";
         public static bool ShowWindow = true;
 
         [StarMapAllModsLoaded]
@@ -108,21 +106,35 @@ namespace Celestial_Charter
                                             ImGui.Text($"Orbiting: {status[3]}");
                                             ImGui.TableSetColumnIndex(1);
                                             ImGui.Text($"Have Orbited: {status[4]}");
+                                            ImGui.TableNextRow();
+                                            ImGui.TableSetColumnIndex(0);
+                                            ImGui.Text($"Suborbital: {status[5]}");
+                                            ImGui.TableSetColumnIndex(1);
+                                            ImGui.Text($"Suborbited: {status[6]}");
+
+                                            if (CurrentVehicleData.AstronomicalDataList[i].HasAtmosphere)
+                                            {
+                                                ImGui.TableNextRow();
+                                                ImGui.TableSetColumnIndex(0);
+                                                ImGui.Text($"In Atmosphere: {status[7]}");
+                                                ImGui.TableSetColumnIndex(1);
+                                                ImGui.Text($"Encountered Atmosphere: {status[8]}");
+                                            }
                                             if (CurrentVehicleData.AstronomicalDataList[i].HasSurface)
                                             {
                                                 ImGui.TableNextRow();
                                                 ImGui.TableSetColumnIndex(0);
-                                                ImGui.Text($"Landed: {status[5]}");
+                                                ImGui.Text($"Landed: {status[9]}");
                                                 ImGui.TableSetColumnIndex(1);
-                                                ImGui.Text($"Have Landed: {status[6]}");
+                                                ImGui.Text($"Have Landed: {status[10]}");
                                             }
                                             if (CurrentVehicleData.AstronomicalDataList[i].HasOceans)
                                             {
                                                 ImGui.TableNextRow();
                                                 ImGui.TableSetColumnIndex(0);
-                                                ImGui.Text($"Splashed Down: {status[7]}");
+                                                ImGui.Text($"Splashed Down: {status[11]}");
                                                 ImGui.TableSetColumnIndex(1);
-                                                ImGui.Text($"Have Splashed Down: {status[8]}");
+                                                ImGui.Text($"Have Splashed Down: {status[12]}");
                                             }
                                             ImGui.EndTable();
                                         }
@@ -136,21 +148,6 @@ namespace Celestial_Charter
                     ImGui.End();
                 }
             }
-        }
-
-        // IDK
-        private static void CreatePopup(string name, string[] text)
-        {
-            // This function is just to show how a ImGui Popup is created
-            ImGui.OpenPopup(name);
-            if (ImGui.BeginPopup(name))
-            {
-                foreach(string s in text)
-                {
-                    ImGui.Text(s);
-                }
-            }
-            ImGui.EndPopup();
         }
     }
 }

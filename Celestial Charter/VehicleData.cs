@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace Celestial_Charter
 {
-    internal class VehicleData
+    public class VehicleData
     {
         public enum BitStatus
         {
@@ -14,6 +14,10 @@ namespace Celestial_Charter
             FlownBy,
             Orbiting,
             Orbited,
+            SubOrbital,
+            SubOrbited,
+            InAtmosphere,
+            EncounteredAtmosphere,
             IsLanded,
             HasLanded,
             IsSplashedDown,
@@ -25,7 +29,7 @@ namespace Celestial_Charter
         public Situation VehicleSituation { get; private set; }
 
         /// <summary>
-        /// An array List containing a status for all the Astronomicals in the current system as BitArrays of size 9.
+        /// An array List containing a status for all the Astronomicals in the current system as BitArrays of size 13.
         /// </summary>
         /// Bit representation:
         /// [0]: Visited
@@ -33,10 +37,14 @@ namespace Celestial_Charter
         /// [2]: Have Flown By
         /// [3]: Are Orbiting
         /// [4]: Have Orbited
-        /// [5]: Are Landed
-        /// [6]: Have Landed
-        /// [7]: Are Splashed Down
-        /// [8]: Have Splashed Down
+        /// [5]: SubOrbital
+        /// [6]: SubOrbited
+        /// [7]: In Atmosphere
+        /// [8]: Encountered Atmosphere
+        /// [9]: Are Landed
+        /// [10]: Have Landed
+        /// [11]: Are Splashed Down
+        /// [12]: Have Splashed Down
         public ArrayList StatusArray { get; private set; }
 
         /// <summary>
@@ -55,7 +63,7 @@ namespace Celestial_Charter
             StatusArray = new ArrayList(numAstronomicalsNonVehicle);
             foreach(var astro in astronomicalsNonVehicle)
             {
-                StatusArray.Add(new BitArray(9, false));
+                StatusArray.Add(new BitArray(13, false));
                 AstronomicalDataList.Add(new AstronomicalData(astro));
             }
             curStatusIndex = AstronomicalDataList.FindIndex(x => x.Astronomical.Id == AstronomicalOrbiting.Id);
@@ -70,6 +78,7 @@ namespace Celestial_Charter
             VehicleSituation = Vehicle.LastKinematicStates.Situation;
             if(oldOrbit != AstronomicalOrbiting)
             {
+                if (AstroStatus != null) setTempStatusFalse(AstroStatus);
                 curStatusIndex = AstronomicalDataList.FindIndex(x => x.Astronomical == AstronomicalOrbiting);
                 AstroStatus = StatusArray[curStatusIndex] as BitArray;
             }
@@ -86,55 +95,42 @@ namespace Celestial_Charter
         private void UpdateStatus(BitArray astroStatus)
         {
             // Visited = true
-            astroStatus.Set((int)BitStatus.Visited, true);
+            astroStatus[(int)BitStatus.Visited] = true;
 
-            if(isFlyingBy())
-            {
-                astroStatus.Set((int)BitStatus.FlyingBy, true);
-                astroStatus.Set((int)BitStatus.FlownBy, true);
+            astroStatus[(int)BitStatus.FlyingBy] = isFlyingBy();
+            // Once set to true, will stay as true as the bitwise OR won't change the boolean
+            astroStatus[(int)BitStatus.FlownBy] = astroStatus[(int)BitStatus.FlownBy] | astroStatus[(int)BitStatus.FlyingBy];
 
-                // Make sure the other Temporary situations are false.
-                astroStatus.Set((int)BitStatus.Orbiting, false);
-                astroStatus.Set((int)BitStatus.IsLanded, false);
-                astroStatus.Set((int)BitStatus.IsSplashedDown, false);
-            }
-            else if(isOrbiting())
-            {
-                astroStatus.Set((int)BitStatus.Orbiting, true);
-                astroStatus.Set((int)BitStatus.Orbited, true);
+            astroStatus[(int)BitStatus.Orbiting] = isOrbiting();
+            // Once set to true, will stay as true as the bitwise OR won't change the boolean
+            astroStatus[(int)BitStatus.Orbited] = astroStatus[(int)BitStatus.Orbited] | astroStatus[(int)BitStatus.Orbiting];
 
-                // Make sure the other Temporary situations are false.
-                astroStatus.Set((int)BitStatus.FlyingBy, false);
-                astroStatus.Set((int)BitStatus.IsLanded, false);
-                astroStatus.Set((int)BitStatus.IsSplashedDown, false);
-            }
-            else if(VehicleSituation.HasTerrainContact())
-            {
-                astroStatus.Set((int)BitStatus.IsLanded, true);
-                astroStatus.Set((int)BitStatus.HasLanded, true);
+            astroStatus[(int)BitStatus.SubOrbital] = isSubOrbital();
+            // Once set to true, will stay as true as the bitwise OR won't change the boolean
+            astroStatus[(int)BitStatus.SubOrbited] = astroStatus[(int)BitStatus.SubOrbited] | astroStatus[(int)BitStatus.SubOrbital];
 
-                // Make sure the other Temporary situations are false.
-                astroStatus.Set((int)BitStatus.FlyingBy, false);
-                astroStatus.Set((int)BitStatus.Orbiting, false);
-                astroStatus.Set((int)BitStatus.IsSplashedDown, false);
-            }
-            else if(VehicleSituation.HasOceanContact())
-            {
-                astroStatus.Set((int)BitStatus.IsSplashedDown, true);
-                astroStatus.Set((int)BitStatus.HasSplashedDown, true);
+            astroStatus[(int)BitStatus.InAtmosphere] = inAtmosphere();
+            // Once set to true, will stay as true as the bitwise OR won't change the boolean
+            astroStatus[(int)BitStatus.EncounteredAtmosphere] = astroStatus[(int)BitStatus.EncounteredAtmosphere] | astroStatus[(int)BitStatus.InAtmosphere];
 
-                // Make sure the other Temporary situations are false.
-                astroStatus.Set((int)BitStatus.FlyingBy, false);
-                astroStatus.Set((int)BitStatus.Orbiting, false);
-                astroStatus.Set((int)BitStatus.IsLanded, false);
-            }
-            else
-            {
-                astroStatus.Set((int)BitStatus.FlyingBy, false);
-                astroStatus.Set((int)BitStatus.Orbiting, false);
-                astroStatus.Set((int)BitStatus.IsLanded, false);
-                astroStatus.Set((int)BitStatus.IsSplashedDown, false);
-            }
+            astroStatus[(int)BitStatus.IsLanded] = VehicleSituation.HasTerrainContact();
+            // Once set to true, will stay as true as the bitwise OR won't change the boolean
+            astroStatus[(int)BitStatus.HasLanded] = astroStatus[(int)BitStatus.HasLanded] | astroStatus[(int)BitStatus.IsLanded];
+
+            astroStatus[(int)BitStatus.IsSplashedDown] = VehicleSituation.HasOceanContact();
+            // Once set to true, will stay as true as the bitwise OR won't change the boolean
+            astroStatus[(int)BitStatus.HasSplashedDown] = astroStatus[(int)BitStatus.HasSplashedDown] | astroStatus[(int)BitStatus.IsSplashedDown];
+
+        }
+
+        private void setTempStatusFalse(BitArray astroStatus)
+        {
+            astroStatus[(int)BitStatus.FlyingBy] = false;
+            astroStatus[(int)BitStatus.Orbiting] = false;
+            astroStatus[(int)BitStatus.SubOrbital] = false;
+            astroStatus[(int)BitStatus.InAtmosphere] = false;
+            astroStatus[(int)BitStatus.IsLanded] = false;
+            astroStatus[(int)BitStatus.IsSplashedDown] = false;
         }
 
         private bool isFlyingBy()
@@ -145,8 +141,36 @@ namespace Celestial_Charter
 
         private bool isOrbiting()
         {
-            // Try and improve
-            return (VehicleOrbit.Apoapsis > AstronomicalOrbiting.MeanRadius + 10000 && VehicleOrbit.Periapsis > AstronomicalOrbiting.MeanRadius + 10000);
+            if(AstronomicalDataList[curStatusIndex].HasAtmosphere)
+            {
+                return (!isFlyingBy() && VehicleOrbit.Periapsis - AstronomicalOrbiting.MeanRadius > AstronomicalDataList[curStatusIndex].AtmosphereHeightM);
+            }
+            else
+            {
+                return (!isFlyingBy() && VehicleOrbit.Periapsis > AstronomicalOrbiting.MeanRadius + 2500);
+            }
+        }
+
+        private bool isSubOrbital()
+        {
+            if(AstronomicalDataList[curStatusIndex].HasAtmosphere)
+            {
+                return (isFlying() && VehicleOrbit.Periapsis - AstronomicalOrbiting.MeanRadius < AstronomicalDataList[curStatusIndex].AtmosphereHeightM && VehicleOrbit.Apoapsis - AstronomicalOrbiting.MeanRadius > AstronomicalDataList[curStatusIndex].AtmosphereHeightM);
+            }
+            else
+            {
+                return (isFlying() && VehicleOrbit.Periapsis < AstronomicalOrbiting.MeanRadius);
+            }
+        }
+
+        private bool inAtmosphere()
+        {
+            return (AstronomicalDataList[curStatusIndex].HasAtmosphere && Vehicle.GetBarometricAltitude() <= AstronomicalDataList[curStatusIndex].AtmosphereHeightM);
+        }
+
+        private bool isFlying()
+        {
+            return (!VehicleSituation.HasOceanContact() && !VehicleSituation.HasTerrainContact());
         }
     }
 }

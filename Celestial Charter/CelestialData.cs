@@ -3,7 +3,7 @@ using KSA;
 
 namespace Celestial_Charter
 {
-    internal class CelestialData
+    public class CelestialData
     {
         public static CelestialSystem? CelestialSystem { get; private set; } = null;
         public static int NumCelestials { get; private set; } = 0;

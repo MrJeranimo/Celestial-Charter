@@ -7,7 +7,7 @@ using Brutal.Logging;
 namespace Celestial_Charter
 {
     [HarmonyPatch]
-    internal static class Patcher
+    public static class Patcher
     {
         private static Harmony? MHarmony = new Harmony("Celestial Charter");
 
