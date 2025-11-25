@@ -4,6 +4,12 @@ This Mod is intended to be a KSA mod dependency that conviently exposes and stor
 
 **License:** MIT License
 
+## Dependencies
+
+Each of the dependencies must be installed and put into the `KSA/Content/` folder and have their `mod.toml` info put into the `manifest.toml` in `Documents/MyGames/Kitten Space Agency/`.
+
+1. ModMenu: [GitHub](https://github.com/MrJeranimo/ModMenu/tree/v0.1.0), [SpaceDock](https://spacedock.info/mod/4054/ModMenu)
+
 ## Using as a Dependency
 
 Anyone is free to use this mod as a dependency for their own mods. I currently do not know how to do that so this section will be updated as I learn more about it.
