@@ -176,7 +176,7 @@ namespace Celestial_Charter
         [ModMenuEntry("Celestial Charter")]
         public static void CreateModMenu()
         {
-            ImGui.MenuItem("Show Main Window", "[, ]", ref ShowWindow, true);
+            ImGui.MenuItem("Show Main Window", "]", ref ShowWindow, true);
         }
     }
 }
