@@ -9,19 +9,6 @@ namespace Celestial_Charter
     [HarmonyPatch]
     public static class Patcher
     {
-        private static Harmony? MHarmony = new Harmony("Celestial Charter");
-
-        public static void Patch()
-        {
-            MHarmony?.PatchAll(typeof(Patcher).Assembly);
-        }
-
-        public static void Unload()
-        {
-            MHarmony?.UnpatchAll(MHarmony.Id);
-            MHarmony = null;
-        }
-
         [HarmonyPatch(typeof(Vehicle), nameof(Vehicle.OnKey))]
         [HarmonyPrefix]
         public static bool KeyInput(RenderCore.Input.GlfwKeyEvent keyEvent)
@@ -30,9 +17,9 @@ namespace Celestial_Charter
             GlfwKeyAction action = keyEvent.Action;
 
             // When Switching vehicles reopen the Celestial Charter window
-            if ((key == GlfwKey.LeftBracket || key == GlfwKey.RightBracket) && action == GlfwKeyAction.Release)
+            if (key == GlfwKey.RightBracket && action == GlfwKeyAction.Release)
             {
-                Main.ShowWindow = true;
+                CelestialCharter.ShowWindow = true;
 
                 // Return true to continue with the other key checks
                 return true;

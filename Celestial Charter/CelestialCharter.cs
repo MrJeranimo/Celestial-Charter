@@ -1,14 +1,18 @@
-﻿using KSA;
-using StarMap.API;
+﻿using Brutal.ImGuiApi;
 using Brutal.Logging;
-using Brutal.ImGuiApi;
+using HarmonyLib;
+using KSA;
+using ModMenu;
+using StarMap.API;
 using System.Collections;
+using System.Reflection;
 
 namespace Celestial_Charter
 {
     [StarMapMod]
-    public class Main
+    public class CelestialCharter
     {
+        public readonly Harmony MHarmony = new Harmony("Celestial Charter");
         public CelestialSystem? CelestialSystem = null;
         public int NumCelestials = 0;
         public List<Astronomical> Astronomicals { get; private set; } = new List<Astronomical>();
@@ -26,13 +30,13 @@ namespace Celestial_Charter
         [StarMapAllModsLoaded]
         public void OnFullyLoaded()
         {
-            Patcher.Patch();
+            MHarmony.PatchAll(typeof(CelestialCharter).Assembly);
         }
 
         [StarMapUnload]
         public void OnUnload()
         {
-            Patcher.Unload();
+            MHarmony.UnpatchAll(nameof(CelestialCharter));
         }
 
         [StarMapBeforeGui]
@@ -167,6 +171,12 @@ namespace Celestial_Charter
                     ImGui.End();
                 }
             }
+        }
+
+        [ModMenuEntry("Celestial Charter")]
+        public static void CreateModMenu()
+        {
+            ImGui.MenuItem("Show Main Window", "[, ]", ref ShowWindow, true);
         }
     }
 }

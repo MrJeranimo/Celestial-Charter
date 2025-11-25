@@ -5,16 +5,26 @@
     <RootNamespace>Celestial_Charter</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
-  <ItemGroup>
-	  <PackageReference Include="Lib.Harmony" Version="2.4.2">
-		  <PrivateAssets>all</PrivateAssets>
-	  </PackageReference>
-		<PackageReference Include="StarMap.API" Version="0.2.4">
+	<Target Name="PostBuild" AfterTargets="Build">
+		<MakeDir Directories="C:/Program Files/Kitten Space Agency/Content/"></MakeDir>
+	    <Copy SourceFiles="$(TargetPath)" DestinationFolder="C:/Program Files/Kitten Space Agency/Content/Celestial Charter" />
+		
+	</Target>
+
+	<ItemGroup>
+		<PackageReference Include="ModMenu.Attributes" Version="1.0.1" />
+		
+		<PackageReference Include="Lib.Harmony" Version="2.4.2">
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-  </ItemGroup>
+
+		<PackageReference Include="StarMap.API" Version="0.3.1">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
 
   <ItemGroup>
     <Reference Include="Brutal.Core.Logging">
