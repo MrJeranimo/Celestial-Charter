@@ -1,8 +1,6 @@
 ﻿using Brutal.GlfwApi;
-using RenderCore;
 using HarmonyLib;
 using KSA;
-using Brutal.Logging;
 
 namespace Celestial_Charter
 {

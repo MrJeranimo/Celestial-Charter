@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using KSA;
+﻿using KSA;
 
 namespace Celestial_Charter
 {

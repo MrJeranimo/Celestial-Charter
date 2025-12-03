@@ -1,11 +1,9 @@
 ﻿using Brutal.ImGuiApi;
-using Brutal.Logging;
 using HarmonyLib;
 using KSA;
 using ModMenu;
 using StarMap.API;
 using System.Collections;
-using System.Reflection;
 
 namespace Celestial_Charter
 {

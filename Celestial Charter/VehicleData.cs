@@ -1,5 +1,4 @@
-﻿using Brutal.GlfwApi;
-using Brutal.Logging;
+﻿using Brutal.Logging;
 using KSA;
 using System.Collections;
 
