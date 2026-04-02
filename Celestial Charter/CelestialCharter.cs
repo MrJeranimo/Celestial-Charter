@@ -17,7 +17,7 @@ namespace Celestial_Charter
         public Vehicle? CurrentVehicle = null;
         public VehicleData? CurrentVehicleData = null;
         public Orbit? VehicleOrbit = null;
-        public Astronomical? AstronomicalOrbiting = null;
+        public IParentBody? AstronomicalOrbiting = null;
         public Situation VehicleSituation = new Situation();
         public List<Astronomical> NonVehicleAstronomicalList { get; private set; } = new List<Astronomical>();
         public List<Astronomical> RootAstronomicals { get; private set; } = new List<Astronomical>();
@@ -63,8 +63,8 @@ namespace Celestial_Charter
                     }
 
                     // Determine Root Astronomicals
-                    var allChildren = NonVehicleAstronomicalList.Where(a => a.HasChildren()).SelectMany(a => a.Children.Where(c => c is not Vehicle)).ToHashSet();
-                    RootAstronomicals = NonVehicleAstronomicalList.Where(a => !allChildren.Contains(a)).ToList();
+                    var allChildren = NonVehicleAstronomicalList.Where(a => ((IParentBody)a).HasChildren()).SelectMany(a => ((IParentBody)a).Children.Where(c => c is not Vehicle)).ToHashSet();
+                    RootAstronomicals = NonVehicleAstronomicalList.Where(a => a is StellarBody).ToList();
                 }
             }
 
@@ -178,7 +178,7 @@ namespace Celestial_Charter
         {
             int index = NonVehicleAstronomicalList.FindIndex(a => a.Id == astro.Id);
 
-            bool hasChildren = astro.HasChildren();
+            bool hasChildren = ((IParentBody)astro).HasChildren();
             ImGuiTreeNodeFlags nodeFlags = treeFlags;
 
             // Don't push if no children
@@ -199,10 +199,10 @@ namespace Celestial_Charter
                 // Recursively render children
                 if (hasChildren)
                 {
-                    List<Astronomical> childAstros = astro.Children.Where(c => c is not Vehicle).ToList();
+                    List<IOrbiter> childAstros = ((IParentBody)astro).Children.Where(c => c is not Vehicle).ToList();
                     foreach (var child in childAstros)
                     {
-                        RenderAstronomicalNode(child, treeFlags);
+                        RenderAstronomicalNode((Astronomical)child, treeFlags);
                     }
 
                     ImGui.TreePop();

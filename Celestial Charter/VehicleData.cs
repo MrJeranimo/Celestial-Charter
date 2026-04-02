@@ -24,7 +24,7 @@ namespace Celestial_Charter
         }
         public Vehicle Vehicle { get; private set; }
         public Orbit VehicleOrbit {  get; private set; }
-        public Astronomical AstronomicalOrbiting { get; private set; }
+        public IParentBody AstronomicalOrbiting { get; private set; }
         public Situation VehicleSituation { get; private set; }
 
         /// <summary>
