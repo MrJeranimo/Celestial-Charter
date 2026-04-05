@@ -12,7 +12,6 @@ namespace Celestial_Charter
     {
         public readonly Harmony MHarmony = new Harmony("Celestial Charter");
         public CelestialSystem? CelestialSystem = null;
-        public int NumCelestials = 0;
         public List<Astronomical> Astronomicals { get; private set; } = new List<Astronomical>();
         public Vehicle? CurrentVehicle = null;
         public VehicleData? CurrentVehicleData = null;
@@ -44,7 +43,6 @@ namespace Celestial_Charter
             if (CelestialSystem == null)
             {
                 CelestialSystem = CelestialData.FetchCelestialSystem();
-                NumCelestials = CelestialData.NumCelestials;
                 Astronomicals = CelestialData.AstronomicalList;
                 NonVehicleAstronomicalList = CelestialData.AstronomicalNonVehicleList;
                 if(CelestialSystem != null)
@@ -54,7 +52,7 @@ namespace Celestial_Charter
                     {
                         VehicleData.AstronomicalDataList.Add(new AstronomicalData(astro));
                     }
-                    VehicleList = CelestialSystem.Vehicles.GetList();
+                    VehicleList = CelestialSystem.All.UnsafeAsList().OfType<Vehicle>().ToList();
 
                     // Create one VehicleData with a unique StatusArray for each of the astronomicals for each vehicle
                     foreach (var vehicle in VehicleList)
