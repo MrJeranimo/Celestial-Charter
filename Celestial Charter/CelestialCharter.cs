@@ -61,7 +61,6 @@ namespace Celestial_Charter
                     }
 
                     // Determine Root Astronomicals
-                    var allChildren = NonVehicleAstronomicalList.Where(a => ((IParentBody)a).HasChildren()).SelectMany(a => ((IParentBody)a).Children.Where(c => c is not Vehicle)).ToHashSet();
                     RootAstronomicals = NonVehicleAstronomicalList.Where(a => a is StellarBody).ToList();
                 }
             }
@@ -97,7 +96,7 @@ namespace Celestial_Charter
             {
                 VehicleOrbit = CurrentVehicle.Orbit;
                 AstronomicalOrbiting = VehicleOrbit.Parent;
-                VehicleSituation = CurrentVehicle.LastKinematicStates.Situation;
+                VehicleSituation = CurrentVehicle.Situation;
 
                 // Get the Current Vehicle from the Data List
                 CurrentVehicleData = VehicleDataList.Find(x => x.Vehicle == CurrentVehicle);
@@ -156,7 +155,7 @@ namespace Celestial_Charter
                             // Start the General Info Tab
                             if (ImGui.BeginTabItem("General Info"))
                             {
-                                ImGui.Text($"Current Celestial System: {CelestialSystem?.Id}");
+                                ImGui.Text($"Current Celestial System: {CelestialSystem!.Id}");
                                 ImGui.Separator();
                                 ImGui.Text($"Current Vehicle: {CurrentVehicle.Id}");
                                 ImGui.Separator();
