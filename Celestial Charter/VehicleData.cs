@@ -58,7 +58,7 @@ namespace Celestial_Charter
             this.Vehicle = vehicle;
             VehicleOrbit = vehicle.Orbit;
             AstronomicalOrbiting = VehicleOrbit.Parent;
-            VehicleSituation = vehicle.LastKinematicStates.Situation;
+            VehicleSituation = vehicle.Situation;
             StatusArray = new ArrayList(AstronomicalDataList.Count);
             foreach(var astro in AstronomicalDataList)
             {
@@ -77,7 +77,7 @@ namespace Celestial_Charter
             VehicleOrbit = Vehicle.Orbit;
             var oldOrbit = AstronomicalOrbiting;
             AstronomicalOrbiting = VehicleOrbit.Parent;
-            VehicleSituation = Vehicle.LastKinematicStates.Situation;
+            VehicleSituation = Vehicle.Situation;
             if(oldOrbit != AstronomicalOrbiting)
             {
                 // Clear Temp Status for old astronomical

@@ -1,3 +1,7 @@
 name="Celestial Charter"
-version="0.3.8"
+version="0.3.9"
 author="MrJeranimo"
+description="This mod tracks the status and states of all the vehicles in the game and shows if you have visted, landed, splashed down, etc. on each Celestial"
+
+[StarMap]
+EntryAssembly="Celestial Charter"
